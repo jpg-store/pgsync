@@ -155,7 +155,7 @@ class ElasticHelper(object):
         ignore_status: Tuple[int] = (400, 404)
 
         if ELASTICSEARCH_STREAMING_BULK:
-            for _ in helpers.streaming_bulk(
+            for doc in helpers.streaming_bulk(
                 self.__es,
                 docs,
                 index=index,
@@ -168,11 +168,12 @@ class ElasticHelper(object):
                 raise_on_exception=raise_on_exception,
                 raise_on_error=raise_on_error,
             ):
+                print(f"Bulk Response: {doc}")
                 self.doc_count += 1
         else:
             # parallel bulk consumes more memory and is also more likely
             # to result in 429 errors.
-            for _ in helpers.parallel_bulk(
+            for doc in helpers.parallel_bulk(
                 self.__es,
                 docs,
                 thread_count=thread_count,
@@ -184,6 +185,7 @@ class ElasticHelper(object):
                 raise_on_error=raise_on_error,
                 ignore_status=ignore_status,
             ):
+                print(f"Bulk Response: {doc}")
                 self.doc_count += 1
 
     def refresh(self, indices: List[str]) -> None:
